@@ -1,0 +1,108 @@
+class AlarmSystem {
+    // 记录id
+    private Set<Integer> alarmIds = new HashSet<>();
+
+    // 存放alarm
+    private Map<Integer, Map<Integer, Alarm>> alarms = new HashMap<>();
+
+    public AlarmSystem() {
+        for (int i = 0; i < 7; i++) {
+            alarms.put(i + 1, new HashMap<>());
+        }
+    }
+
+    public boolean addAlarm(int id, int hour, int minute, int[] weekdays, int typeId) {
+        if (alarmIds.contains(id)) {
+            return false;
+        }
+        alarmIds.add(id);
+        Alarm alarm = new Alarm(id, hour, minute, weekdays, typeId);
+        for (int weekday : weekdays) {
+            alarms.get(weekday).put(id, alarm);
+        }
+        return true;
+    }
+
+    public boolean deleteAlarm(int id) {
+        if (!alarmIds.contains(id)) {
+            return false;
+        }
+        alarmIds.remove(id);
+        alarms.values().forEach(v -> v.remove(id));
+        return true;
+    }
+
+    public Integer[] queryAlarm(int weekday, int hour, int startMinute, int endMinute) {
+        List<Alarm> alarmList = new ArrayList<>();
+        Map<Integer, Alarm> alarmMap = alarms.get(weekday);
+        alarmMap.forEach((k, v) -> {
+            if (v.getHour() == hour && v.getMinute() >= startMinute && v.getMinute() <= endMinute) {
+                alarmList.add(v);
+            }
+        });
+        return alarmList.stream()
+            .sorted(
+                Comparator.comparingInt(Alarm::getMinute).thenComparing(Alarm::getTypeId).thenComparing(Alarm::getId))
+            .map(Alarm::getId)
+            .toArray(Integer[]::new);
+    }
+
+    class Alarm {
+        private int id;
+        private int hour;
+        private int minute;
+        private int[] weekdays;
+        private int typeId;
+
+        public Alarm() {
+        }
+
+        public Alarm(int id, int hour, int minute, int[] weekdays, int typeId) {
+            this.id = id;
+            this.hour = hour;
+            this.minute = minute;
+            this.weekdays = weekdays;
+            this.typeId = typeId;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public void setId(int id) {
+            this.id = id;
+        }
+
+        public int getHour() {
+            return hour;
+        }
+
+        public void setHour(int hour) {
+            this.hour = hour;
+        }
+
+        public int getMinute() {
+            return minute;
+        }
+
+        public void setMinute(int minute) {
+            this.minute = minute;
+        }
+
+        public int[] getWeekdays() {
+            return weekdays;
+        }
+
+        public void setWeekdays(int[] weekdays) {
+            this.weekdays = weekdays;
+        }
+
+        public int getTypeId() {
+            return typeId;
+        }
+
+        public void setTypeId(int typeId) {
+            this.typeId = typeId;
+        }
+    }
+}
